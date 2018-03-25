@@ -1,1 +1,20 @@
-
+/ip pool
+              add name=vpn_pool ranges=192.168.1.200-192.168.1.210
+/ppp profile>
+              add name=l2tp change-tcp-mss=yes local-address=192.168.1.1 only-one=default \
+              remote-address=vpn_pool use-compression=default use-encryption=yes  bridge=bridge
+/interface l2tp-server server              
+              set authentication=mschap2 default-profile=l2tp enabled=yes ipsec-secret="Len*reDHat9" \
+              max-mru=1460 max-mtu=1460 use-ipsec=yes
+/ppp secret 
+              add comment="VPN for 1C" name=Boss password=Len*reDHat9 profile=l2tp
+/interface l2tp-server
+              add name=boss user=boss
+/ip ipsec proposal
+              set [ find default=yes ] auth-algorithms=sha1 disabled=no enc-algorithms=aes-256-cbc,aes-192-cbc,aes-128-cbc,3des \
+              lifetime=30m name=default pfs-group=modp1024
+/ip ipsec peer
+    address=0.0.0.0/0 auth-method=pre-shared-key secret="Len*reDHat9" generate-policy=port-override policy-template-group=default  \ 
+    exchange-mode=main-l2tp send-initial-contact=yes nat-traversal=yes my-id=fqdn proposal-check=obey hash-algorithm=sha1 \
+    enc-algorithm=aes-256,aes-192,aes-128,3des dh-group=modp1024 lifetime=1d dpd-interval=disable-dpd  dpd-maximum-failures=1
+/interface bridge set 0 arp=proxy-arp
