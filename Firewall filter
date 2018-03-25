@@ -1,1 +1,4 @@
-
+> ip firewall filter
+ /ip firewall filter>
+                      add comment=Remote_Access chain=input protocol=tcp port=80 
+                      add comment=L2TP chain=input action=accept protocol=udp port=1701,500,4500 
