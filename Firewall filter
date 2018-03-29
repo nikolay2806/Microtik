@@ -2,3 +2,37 @@
  /ip firewall filter>
                       add comment=Remote_Access chain=input protocol=tcp port=80 
                       add comment=L2TP chain=input action=accept protocol=udp port=1701,500,4500 
+D ;;; special dummy rule to show fasttrack counters
+      chain=forward action=passthrough 
+
+ 1    ;;; Remote_Access
+      chain=input action=accept protocol=tcp port=80 
+
+ 2    ;;; L2TP
+      chain=input action=accept protocol=udp port=1701,500,4500 
+
+ 3    ;;; defconf: accept ICMP
+      chain=input action=accept protocol=icmp 
+
+ 4    chain=forward action=accept protocol=icmp log=no 
+
+ 5    ;;; Established Connection Allowed
+      chain=input action=accept connection-state=established log=no 
+
+ 6    chain=forward action=accept connection-state=established log=no 
+
+ 7    ;;; Related Connection Allowed
+      chain=input action=accept connection-state=related log=no 
+
+ 8    chain=forward action=accept connection-state=related log=no 
+
+ 9    ;;; Local Connection Allowed
+      chain=input action=accept src-address=192.168.88.0/24 in-interface=!ether1 log=no 
+
+10    chain=input action=accept src-address=192.168.1.0/24 in-interface=!ether1 log=no 
+
+11    ;;; Invalid Connection Dropping
+      chain=input action=drop connection-state=invalid log=no 
+
+12    chain=forward action=drop connection-state=invalid log=no 
+
